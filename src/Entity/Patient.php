@@ -2,12 +2,26 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\PatientRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['patient:readlist']]
+        ),
+        new Get(
+            normalizationContext: ['groups' => ['patient:readdetail']]
+        )
+    ],
+)]
 #[ORM\Entity(repositoryClass: PatientRepository::class)]
 class Patient
 {
@@ -16,42 +30,50 @@ class Patient
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 255)]
+    #[Groups(['patient:readlist', 'patient:readdetail', 'rendezvous:readlist', 'rendezvous:readdetail'])]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 255)]
+    #[Groups(['patient:readlist', 'patient:readdetail', 'rendezvous:readlist', 'rendezvous:readdetail'])]
     private ?string $prenom = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[Groups(['patient:readlist', 'patient:readdetail'])]
     private ?\DateTimeImmutable $date_naissance = null;
 
-    #[ORM\Column(length: 10)]
+    #[ORM\Column(length: 1)]
     private ?string $sexe = null;
 
     #[ORM\Column(length: 255)]
     private ?string $adresse = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 15)]
+    #[Groups(['patient:readlist'])]
     private ?string $telephone = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 255)]
+    #[Groups(['patient:readdetail'])]
     private ?string $email = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 255)]
+    #[Groups(['patient:readdetail'])]
     private ?string $numero_secu = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[Groups(['patient:readdetail'])]
     private ?\DateTimeImmutable $date_inscription = null;
 
     /**
-     * @var Collection<int, RendezVous>
+     * @var Collection<int, Rendezvous>
      */
-    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'id_patient')]
-    private Collection $rendezVous;
+    #[ORM\OneToMany(targetEntity: Rendezvous::class, mappedBy: 'patient')]
+    #[Groups(['patient:readdetail'])]
+    private Collection $listeRendezVous;
 
     public function __construct()
     {
-        $this->rendezVous = new ArrayCollection();
+        $this->listeRendezVous = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -168,29 +190,29 @@ class Patient
     }
 
     /**
-     * @return Collection<int, RendezVous>
+     * @return Collection<int, Rendezvous>
      */
-    public function getRendezVous(): Collection
+    public function getListeRendezVous(): Collection
     {
-        return $this->rendezVous;
+        return $this->listeRendezVous;
     }
 
-    public function addRendezVou(RendezVous $rendezVou): static
+    public function addListeRendezVou(Rendezvous $listeRendezVou): static
     {
-        if (!$this->rendezVous->contains($rendezVou)) {
-            $this->rendezVous->add($rendezVou);
-            $rendezVou->setIdPatient($this);
+        if (!$this->listeRendezVous->contains($listeRendezVou)) {
+            $this->listeRendezVous->add($listeRendezVou);
+            $listeRendezVou->setPatient($this);
         }
 
         return $this;
     }
 
-    public function removeRendezVou(RendezVous $rendezVou): static
+    public function removeListeRendezVou(Rendezvous $listeRendezVou): static
     {
-        if ($this->rendezVous->removeElement($rendezVou)) {
+        if ($this->listeRendezVous->removeElement($listeRendezVou)) {
             // set the owning side to null (unless already changed)
-            if ($rendezVou->getIdPatient() === $this) {
-                $rendezVou->setIdPatient(null);
+            if ($listeRendezVou->getPatient() === $this) {
+                $listeRendezVou->setPatient(null);
             }
         }
 

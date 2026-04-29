@@ -2,41 +2,44 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\MedicamentRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(),
+        new Get()
+    ],
+    normalizationContext: ['groups' => ['medicament:read']]
+)]
 #[ORM\Entity(repositoryClass: MedicamentRepository::class)]
 class Medicament
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['medicament:read'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 255)]
+    #[Groups(['ordonnance:readlist', 'ordonnance:readdetail', 'medicament:read', 'prescription:read', 'consultation:readdetail'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['medicament:read'])]
     private ?string $dci = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['medicament:read'])]
     private ?string $forme = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['ordonnance:readlist', 'ordonnance:readdetail', 'medicament:read', 'prescription:read', 'consultation:readdetail'])]
     private ?string $dosage = null;
-
-    /**
-     * @var Collection<int, Prescription>
-     */
-    #[ORM\OneToMany(targetEntity: Prescription::class, mappedBy: 'id_medicament')]
-    private Collection $prescirptions;
-
-    public function __construct()
-    {
-        $this->prescirptions = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -87,36 +90,6 @@ class Medicament
     public function setDosage(string $dosage): static
     {
         $this->dosage = $dosage;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Prescription>
-     */
-    public function getPrescirptions(): Collection
-    {
-        return $this->prescirptions;
-    }
-
-    public function addPrescirption(Prescription $prescirption): static
-    {
-        if (!$this->prescirptions->contains($prescirption)) {
-            $this->prescirptions->add($prescirption);
-            $prescirption->setIdMedicament($this);
-        }
-
-        return $this;
-    }
-
-    public function removePrescirption(Prescription $prescirption): static
-    {
-        if ($this->prescirptions->removeElement($prescirption)) {
-            // set the owning side to null (unless already changed)
-            if ($prescirption->getIdMedicament() === $this) {
-                $prescirption->setIdMedicament(null);
-            }
-        }
 
         return $this;
     }

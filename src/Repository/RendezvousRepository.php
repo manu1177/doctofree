@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\RendezVous;
+use App\Entity\Rendezvous;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<RendezVous>
+ * @extends ServiceEntityRepository<Rendezvous>
  */
-class RendezVousRepository extends ServiceEntityRepository
+class RendezvousRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, RendezVous::class);
+        parent::__construct($registry, Rendezvous::class);
     }
 
     //    /**
-    //     * @return RendezVous[] Returns an array of RendezVous objects
+    //     * @return Rendezvous[] Returns an array of Rendezvous objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class RendezVousRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?RendezVous
+    //    public function findOneBySomeField($value): ?Rendezvous
     //    {
     //        return $this->createQueryBuilder('r')
     //            ->andWhere('r.exampleField = :val')

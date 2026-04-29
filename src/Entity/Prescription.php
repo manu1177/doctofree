@@ -2,33 +2,49 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\PrescriptionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(),
+        new Get()
+    ],
+    normalizationContext: ['groups' => ['prescription:read']]
+)]
 #[ORM\Entity(repositoryClass: PrescriptionRepository::class)]
 class Prescription
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['prescription:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['ordonnance:readlist', 'prescription:read', 'consultation:readdetail'])]
     private ?string $posologie = null;
 
     #[ORM\Column]
+    #[Groups(['ordonnance:readlist', 'prescription:read', 'consultation:readdetail'])]
     private ?int $duree_jours = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['ordonnance:readlist', 'prescription:read', 'consultation:readdetail'])]
     private ?string $frequence = null;
-
-    #[ORM\ManyToOne(inversedBy: 'prescirptions')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Medicament $id_medicament = null;
 
     #[ORM\ManyToOne(inversedBy: 'prescriptions')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Ordonnance $id_ordonnance = null;
+    private ?Ordonnance $ordonnance = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['ordonnance:readlist', 'ordonnance:readdetail', 'prescription:read', 'consultation:readdetail'])]
+    private ?Medicament $medicament = null;
 
     public function getId(): ?int
     {
@@ -71,26 +87,26 @@ class Prescription
         return $this;
     }
 
-    public function getIdMedicament(): ?Medicament
+    public function getOrdonnance(): ?Ordonnance
     {
-        return $this->id_medicament;
+        return $this->ordonnance;
     }
 
-    public function setIdMedicament(?Medicament $id_medicament): static
+    public function setOrdonnance(?Ordonnance $ordonnance): static
     {
-        $this->id_medicament = $id_medicament;
+        $this->ordonnance = $ordonnance;
 
         return $this;
     }
 
-    public function getIdOrdonnance(): ?Ordonnance
+    public function getMedicament(): ?Medicament
     {
-        return $this->id_ordonnance;
+        return $this->medicament;
     }
 
-    public function setIdOrdonnance(?Ordonnance $id_ordonnance): static
+    public function setMedicament(?Medicament $medicament): static
     {
-        $this->id_ordonnance = $id_ordonnance;
+        $this->medicament = $medicament;
 
         return $this;
     }

@@ -2,34 +2,55 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\ConsultationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['consultation:readlist']]
+        ),
+        new Get(
+            normalizationContext: ['groups' => ['consultation:readdetail']]
+        )
+    ],
+)]
 #[ORM\Entity(repositoryClass: ConsultationRepository::class)]
 class Consultation
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['consultation:readlist', 'consultation:readdetail', 'rendezvous:readdetail'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['consultation:readlist', 'consultation:readdetail', 'rendezvous:readdetail'])]
     private ?\DateTime $date_heure = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['consultation:readdetail', 'rendezvous:readdetail'])]
     private ?string $anamnese = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['consultation:readlist', 'consultation:readdetail', 'rendezvous:readdetail'])]
     private ?string $diagnostic = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['consultation:readdetail', 'rendezvous:readdetail'])]
     private ?string $notes = null;
 
-    #[ORM\OneToOne(inversedBy: 'consultation', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?RendezVous $id_rendez_vous = null;
+    #[Groups(['consultation:readlist', 'consultation:readdetail'])]
+    private ?Rendezvous $rendezVous = null;
 
-    #[ORM\OneToOne(mappedBy: 'id_consultation', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
+    #[Groups(['consultation:readdetail'])]
     private ?Ordonnance $ordonnance = null;
 
     public function getId(): ?int
@@ -85,14 +106,14 @@ class Consultation
         return $this;
     }
 
-    public function getIdRendezVous(): ?RendezVous
+    public function getRendezVous(): ?Rendezvous
     {
-        return $this->id_rendez_vous;
+        return $this->rendezVous;
     }
 
-    public function setIdRendezVous(RendezVous $id_rendez_vous): static
+    public function setRendezVous(Rendezvous $rendezVous): static
     {
-        $this->id_rendez_vous = $id_rendez_vous;
+        $this->rendezVous = $rendezVous;
 
         return $this;
     }
@@ -102,13 +123,8 @@ class Consultation
         return $this->ordonnance;
     }
 
-    public function setOrdonnance(Ordonnance $ordonnance): static
+    public function setOrdonnance(?Ordonnance $ordonnance): static
     {
-        // set the owning side of the relation if necessary
-        if ($ordonnance->getIdConsultation() !== $this) {
-            $ordonnance->setIdConsultation($this);
-        }
-
         $this->ordonnance = $ordonnance;
 
         return $this;

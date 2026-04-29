@@ -5,7 +5,6 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Post;
 use App\Repository\MedecinRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -14,73 +13,67 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ApiResource(
     operations: [
-        new GetCollection(),
-        new Get(),
+        new GetCollection(
+            normalizationContext: ['groups' => ['medecin:readlist']]
+        ),
+        new Get(
+            normalizationContext: ['groups' => ['medecin:readdetail']]
+        )
     ],
-    normalizationContext: ['groups' => ['medecin:read']],
-
-
 )]
-
 #[ORM\Entity(repositoryClass: MedecinRepository::class)]
-#[ORM\Table(name: 'medecin')]
-
-
-
 class Medecin
-
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['medecin:read'])]
+    #[Groups(['cabinet:readdetail', 'medecin:readlist', 'medecin:readdetail'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
-    #[Groups(['medecin:read'])]
+    #[ORM\Column(length: 255)]
+    #[Groups(['cabinet:readdetail', 'medecin:readlist', 'medecin:readdetail', 'rendezvous:readlist', 'rendezvous:readdetail', 'consultation:readlist', 'consultation:readdetail', 'patient:readdetail'])]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 50)]
-    #[Groups(['medecin:read'])]
+    #[ORM\Column(length: 255)]
+    #[Groups(['cabinet:readdetail', 'medecin:readlist', 'medecin:readdetail', 'rendezvous:readlist', 'rendezvous:readdetail', 'consultation:readlist', 'consultation:readdetail', 'patient:readdetail'])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255)]
     private ?string $rpps = null;
 
-    #[ORM\Column(length: 20)]
-    #[Groups(['medecin:read'])]
+    #[ORM\Column(length: 15)]
+    #[Groups(['medecin:readdetail'])]
     private ?string $telephone = null;
 
-    #[ORM\Column(length: 50)]
-    #[Groups(['medecin:read'])]
+    #[ORM\Column(length: 100)]
+    #[Groups(['medecin:readdetail'])]
     private ?string $email = null;
 
     /**
-     * @var Collection<int, RendezVous>
+     * @var Collection<int, Rendezvous>
      */
-    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'id_medecin')]
-    private Collection $rendezVous;
+    #[ORM\OneToMany(targetEntity: Rendezvous::class, mappedBy: 'medecin')]
+    private Collection $listeRendezVous;
+
+    /**
+     * @var Collection<int, Cabinet>
+     */
+    #[ORM\ManyToMany(targetEntity: Cabinet::class, mappedBy: 'medecins')]
+    #[Groups(['medecin:readdetail'])]
+    private Collection $cabinets;
 
     /**
      * @var Collection<int, Specialite>
      */
     #[ORM\ManyToMany(targetEntity: Specialite::class, inversedBy: 'medecins')]
-    #[Groups(['medecin:read'])]
+    #[Groups(['medecin:readlist', 'medecin:readdetail'])]
     private Collection $specialites;
-
-    /**
-     * @var Collection<int, Cabinet>
-     */
-    #[ORM\ManyToMany(targetEntity: Cabinet::class, inversedBy: 'medecins')]
-    #[Groups(['medecin:read'])]
-    private Collection $cabinets;
-
 
     public function __construct()
     {
-        $this->rendezVous = new ArrayCollection();
-        $this->specialites = new ArrayCollection();
+        $this->listeRendezVous = new ArrayCollection();
         $this->cabinets = new ArrayCollection();
+        $this->specialites = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -149,30 +142,57 @@ class Medecin
     }
 
     /**
-     * @return Collection<int, RendezVous>
+     * @return Collection<int, Rendezvous>
      */
-    public function getRendezVous(): Collection
+    public function getListeRendezVous(): Collection
     {
-        return $this->rendezVous;
+        return $this->listeRendezVous;
     }
 
-    public function addRendezVou(RendezVous $rendezVou): static
+    public function addListeRendezVou(Rendezvous $listeRendezVou): static
     {
-        if (!$this->rendezVous->contains($rendezVou)) {
-            $this->rendezVous->add($rendezVou);
-            $rendezVou->setIdMedecin($this);
+        if (!$this->listeRendezVous->contains($listeRendezVou)) {
+            $this->listeRendezVous->add($listeRendezVou);
+            $listeRendezVou->setMedecin($this);
         }
 
         return $this;
     }
 
-    public function removeRendezVou(RendezVous $rendezVou): static
+    public function removeListeRendezVou(Rendezvous $listeRendezVou): static
     {
-        if ($this->rendezVous->removeElement($rendezVou)) {
+        if ($this->listeRendezVous->removeElement($listeRendezVou)) {
             // set the owning side to null (unless already changed)
-            if ($rendezVou->getIdMedecin() === $this) {
-                $rendezVou->setIdMedecin(null);
+            if ($listeRendezVou->getMedecin() === $this) {
+                $listeRendezVou->setMedecin(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Cabinet>
+     */
+    public function getCabinets(): Collection
+    {
+        return $this->cabinets;
+    }
+
+    public function addCabinet(Cabinet $cabinet): static
+    {
+        if (!$this->cabinets->contains($cabinet)) {
+            $this->cabinets->add($cabinet);
+            $cabinet->addMedecin($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCabinet(Cabinet $cabinet): static
+    {
+        if ($this->cabinets->removeElement($cabinet)) {
+            $cabinet->removeMedecin($this);
         }
 
         return $this;
@@ -198,30 +218,6 @@ class Medecin
     public function removeSpecialite(Specialite $specialite): static
     {
         $this->specialites->removeElement($specialite);
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Cabinet>
-     */
-    public function getCabinets(): Collection
-    {
-        return $this->cabinets;
-    }
-
-    public function addCabinet(Cabinet $cabinet): static
-    {
-        if (!$this->cabinets->contains($cabinet)) {
-            $this->cabinets->add($cabinet);
-        }
-
-        return $this;
-    }
-
-    public function removeCabinet(Cabinet $cabinet): static
-    {
-        $this->cabinets->removeElement($cabinet);
 
         return $this;
     }

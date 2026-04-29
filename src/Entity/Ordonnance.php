@@ -2,12 +2,26 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\OrdonnanceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['ordonnance:readlist']]
+        ),
+        new Get(
+            normalizationContext: ['groups' => ['ordonnance:readdetail']]
+        )
+    ],
+)]
 #[ORM\Entity(repositoryClass: OrdonnanceRepository::class)]
 class Ordonnance
 {
@@ -17,22 +31,26 @@ class Ordonnance
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
-    private ?\DateTimeImmutable $dateEmission = null;
+    #[Groups(['ordonnance:readlist', 'ordonnance:readdetail', 'consultation:readdetail'])]
+    private ?\DateTimeImmutable $date_emission = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[Groups(['ordonnance:readlist', 'ordonnance:readdetail', 'consultation:readdetail'])]
     private ?\DateTimeImmutable $date_validite = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['ordonnance:readdetail'])]
     private ?string $instructions = null;
 
-    #[ORM\OneToOne(inversedBy: 'ordonnance', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Consultation $id_consultation = null;
+    private ?Consultation $consultation = null;
 
     /**
      * @var Collection<int, Prescription>
      */
-    #[ORM\OneToMany(targetEntity: Prescription::class, mappedBy: 'id_ordonnance', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Prescription::class, mappedBy: 'ordonnance')]
+    #[Groups(['ordonnance:readlist', 'ordonnance:readdetail', 'consultation:readdetail'])]
     private Collection $prescriptions;
 
     public function __construct()
@@ -47,12 +65,12 @@ class Ordonnance
 
     public function getDateEmission(): ?\DateTimeImmutable
     {
-        return $this->dateEmission;
+        return $this->date_emission;
     }
 
-    public function setDateEmission(\DateTimeImmutable $dateEmission): static
+    public function setDateEmission(\DateTimeImmutable $date_emission): static
     {
-        $this->dateEmission = $dateEmission;
+        $this->date_emission = $date_emission;
 
         return $this;
     }
@@ -81,14 +99,14 @@ class Ordonnance
         return $this;
     }
 
-    public function getIdConsultation(): ?Consultation
+    public function getConsultation(): ?Consultation
     {
-        return $this->id_consultation;
+        return $this->consultation;
     }
 
-    public function setIdConsultation(Consultation $id_consultation): static
+    public function setConsultation(Consultation $consultation): static
     {
-        $this->id_consultation = $id_consultation;
+        $this->consultation = $consultation;
 
         return $this;
     }
@@ -105,7 +123,7 @@ class Ordonnance
     {
         if (!$this->prescriptions->contains($prescription)) {
             $this->prescriptions->add($prescription);
-            $prescription->setIdOrdonnance($this);
+            $prescription->setOrdonnance($this);
         }
 
         return $this;
@@ -115,8 +133,8 @@ class Ordonnance
     {
         if ($this->prescriptions->removeElement($prescription)) {
             // set the owning side to null (unless already changed)
-            if ($prescription->getIdOrdonnance() === $this) {
-                $prescription->setIdOrdonnance(null);
+            if ($prescription->getOrdonnance() === $this) {
+                $prescription->setOrdonnance(null);
             }
         }
 

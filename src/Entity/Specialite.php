@@ -2,35 +2,43 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\SpecialiteRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(),
+        new Get()
+    ],
+    normalizationContext: ['groups' => ['specialite:read']]
+)]
 #[ORM\Entity(repositoryClass: SpecialiteRepository::class)]
 class Specialite
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['specialite:read', 'medecin:readlist', 'medecin:readdetail'])]
     private ?int $id = null;
 
-
-
     #[ORM\Column(length: 255)]
-    #[Groups(['medecin:read'])]
+    #[Groups(['specialite:read', 'medecin:readlist', 'medecin:readdetail'])]
     private ?string $libelle = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $description = null;
 
     /**
      * @var Collection<int, Medecin>
      */
     #[ORM\ManyToMany(targetEntity: Medecin::class, mappedBy: 'specialites')]
-
     private Collection $medecins;
-
-    #[ORM\Column(length: 255)]
-    private ?string $description = null;
 
     public function __construct()
     {
@@ -50,6 +58,18 @@ class Specialite
     public function setLibelle(string $libelle): static
     {
         $this->libelle = $libelle;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }
@@ -77,18 +97,6 @@ class Specialite
         if ($this->medecins->removeElement($medecin)) {
             $medecin->removeSpecialite($this);
         }
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(string $description): static
-    {
-        $this->description = $description;
 
         return $this;
     }

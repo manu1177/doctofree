@@ -1,0 +1,28 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Cabinet index{% endblock %}
+
+{% block admin_content %}
+    <h1 class="text-center text-danger">Cabinets</h1>
+
+ 
+       
+        <tbody>
+        {% for cabinet in cabinets %}
+            <ul>
+                <li>{{ cabinet.nom }} {{ cabinet.adresse }} <a class="my-5" href="{{ path('app_admin_cabinet_show', {'id': cabinet.id}) }}">show</a></li>
+              
+                    
+                    {# <a href="{{ path('app_admin_cabinet_edit', {'id': cabinet.id}) }}">edit</a> #}
+               
+            </ul>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_admin_cabinet_new') }}">Create new</a>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block admin_content %}
+    <h1>Bienvenue {{ app.user.userIdentifier }}</h1>
+    <p>Vous êtes connecté en tant qu'administrateur.</p>
+{% endblock %}

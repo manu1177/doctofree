@@ -1,0 +1,30 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Medicament index{% endblock %}
+
+{% block admin_content %}
+    <h1 class="my-5 text-center text-danger">Medicaments</h1>
+
+    <table class="table">
+       
+        <tbody>
+        {% for medicament in medicaments %}
+            <ul>
+               
+                <li>{{ medicament.nom }}<a class="mx-5" href="{{ path('app_admin_medicament_show', {'id': medicament.id}) }}">show</a></li>
+                
+              
+                    
+                    {# <a href="{{ path('app_admin_medicament_edit', {'id': medicament.id}) }}">edit</a> #}
+               
+            </ul>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_admin_medicament_new') }}">Create new</a>
+{% endblock %}

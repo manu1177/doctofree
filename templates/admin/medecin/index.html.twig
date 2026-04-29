@@ -1,0 +1,28 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Medecin index{% endblock %}
+
+{% block admin_content %}
+    <h1 class="my-5 text-center text-danger">Medecins</h1>
+
+        
+        <tbody>
+        {% for medecin in medecins %}
+            <ul>
+               
+                <li>{{ medecin.nom }} {{ medecin.prenom }}<a class="mx-5" href="{{ path('app_admin_medecin_show', {'id': medecin.id}) }}">show</a></li>
+           
+                    
+                    {# <a href="{{ path('app_admin_medecin_edit', {'id': medecin.id}) }}">edit</a> #}
+                </td>
+            </ul>
+        {% else %}
+            <tr>
+                <td colspan="7">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_admin_medecin_new') }}">Create new</a>
+{% endblock %}

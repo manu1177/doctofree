@@ -2,36 +2,52 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\CabinetRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['cabinet:readlist']]
+        ),
+        new Get(
+            normalizationContext: ['groups' => ['cabinet:readdetail']]
+        )
+    ],
+
+)]
 #[ORM\Entity(repositoryClass: CabinetRepository::class)]
 class Cabinet
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['cabinet:readlist', 'cabinet:readdetail', 'medecin:readdetail'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
-    #[Groups(['medecin:write'])]
+    #[ORM\Column(length: 255)]
+    #[Groups(['cabinet:readlist', 'cabinet:readdetail', 'medecin:readdetail'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['medecin:write'])]
+    #[Groups(['cabinet:readlist', 'cabinet:readdetail'])]
     private ?string $adresse = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 255)]
+    #[Groups(['cabinet:readdetail'])]
     private ?string $telephone = null;
 
     /**
      * @var Collection<int, Medecin>
      */
-    #[ORM\ManyToMany(targetEntity: Medecin::class, mappedBy: 'cabinets')]
-
+    #[ORM\ManyToMany(targetEntity: Medecin::class, inversedBy: 'cabinets')]
+    #[Groups(['cabinet:readdetail'])]
     private Collection $medecins;
 
     public function __construct()
@@ -88,21 +104,19 @@ class Cabinet
         return $this->medecins;
     }
 
+    // Cabinet.php
     public function addMedecin(Medecin $medecin): static
     {
         if (!$this->medecins->contains($medecin)) {
             $this->medecins->add($medecin);
-            $medecin->addCabinet($this);
+            $medecin->addCabinet($this); // ← synchronisation du côté inverse
         }
-
         return $this;
     }
 
     public function removeMedecin(Medecin $medecin): static
     {
-        if ($this->medecins->removeElement($medecin)) {
-            $medecin->removeCabinet($this);
-        }
+        $this->medecins->removeElement($medecin);
 
         return $this;
     }

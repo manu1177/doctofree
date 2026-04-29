@@ -13,8 +13,13 @@ use App\Entity\Rendezvous;
 use App\Entity\Specialite;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use App\Entity\User;
 
 class AppFixtures extends Fixture
+
+
+
+
 {
     public function load(ObjectManager $manager): void
     {
@@ -200,8 +205,8 @@ class AppFixtures extends Fixture
                 $rdv->setDureeMinutes([15, 20, 30, 45][array_rand([15, 20, 30, 45])]);
                 $rdv->setStatut($statut);
                 $rdv->setMotif($motifs[array_rand($motifs)]);
-                $rdv->setIdMedecin($medecin);
-                $rdv->setIdPatient($patient);
+                $rdv->setMedecin($medecin);
+                $rdv->setPatient($patient);
                 $manager->persist($rdv);
 
                 // On crée une consultation uniquement si le RDV est effectué
@@ -211,7 +216,7 @@ class AppFixtures extends Fixture
                     $consultation->setDiagnostic($diagnostics[array_rand($diagnostics)]);
                     $consultation->setAnamnese($anamneses[array_rand($anamneses)]);
                     $consultation->setNotes(rand(0, 1) ? 'Contrôle dans 3 mois.' : null);
-                    $consultation->setIdRendezVous($rdv);
+                    $consultation->setRendezVous($rdv);
                     $rdv->setConsultation($consultation);
                     $manager->persist($consultation);
 
@@ -223,7 +228,7 @@ class AppFixtures extends Fixture
                         $ordonnance->setDateEmission($dateEmission);
                         $ordonnance->setDateValidite($dateEmission->modify('+3 months'));
                         $ordonnance->setInstructions('Prendre les médicaments au cours des repas. Consulter en cas d\'effets indésirables.');
-                        $ordonnance->setIdConsultation($consultation);
+                        $ordonnance->setConsultation($consultation);
                         $consultation->setOrdonnance($ordonnance);
                         $manager->persist($ordonnance);
 
@@ -239,8 +244,8 @@ class AppFixtures extends Fixture
                             $prescription->setPosologie('1 comprimé matin et soir');
                             $prescription->setDureeJours([5, 7, 10, 30][array_rand([5, 7, 10, 30])]);
                             $prescription->setFrequence('Toutes les 12 heures');
-                            $prescription->setIdOrdonnance($ordonnance);
-                            $prescription->setIdMedicament($medicaments[$medIndex]);
+                            $prescription->setOrdonnance($ordonnance);
+                            $prescription->setMedicament($medicaments[$medIndex]);
                             $manager->persist($prescription);
                         }
                     }
