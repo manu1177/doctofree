@@ -1,101 +1,97 @@
 {% extends 'admin/base.html.twig' %}
 
-{% block title %}Patient{% endblock %}
+{% block title %}Patient
+{% endblock %}
 
 {% block admin_content %}
-    <h1>Patient</h1>
+	<h1>Patient</h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ patient.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ patient.nom }}</td>
-            </tr>
-            <tr>
-                <th>Prenom</th>
-                <td>{{ patient.prenom }}</td>
-            </tr>
-            <tr>
-                <th>Date_naissance</th>
-                <td>{{ patient.dateNaissance ? patient.dateNaissance|date('Y-m-d') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Sexe</th>
-                <td>{{ patient.sexe }}</td>
-            </tr>
-            <tr>
-                <th>Adresse</th>
-                <td>{{ patient.adresse }}</td>
-            </tr>
-            <tr>
-                <th>Telephone</th>
-                <td>{{ patient.telephone }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ patient.email }}</td>
-            </tr>
-            <tr>
-                <th>Numero_secu</th>
-                <td>{{ patient.numeroSecu }}</td>
-            </tr>
-            <tr>
-                <th>Date_inscription</th>
-                <td>{{ patient.dateInscription ? patient.dateInscription|date('Y-m-d') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-
-    {% for rdv in patient.listeRendezVous %}
-        {% if  rdv.consultation %}
-             <h2 class="mt-5 mb-2">Consultation du : {{rdv.consultation.dateHeure|date('d/m/Y')}}</h2>
-            <p><strong>{{rdv.consultation.diagnostic}}</strong></p>
-            <span>{{rdv.consultation.anamnese}}</span>
-            <span>{{rdv.consultation.notes}}</span>
-            
-           
-                
-         
-                {% if  rdv.consultation.ordonnance %}  
-                      <h5 class="mt-4 mb-2">Ordonnance du {{ rdv.consultation.ordonnance.dateEmission|date('d/m/Y') }}</h5>
-                         <p>{{rdv.consultation.ordonnance.instructions}}</p>
-                           <ul>
-                    {% for prescription in rdv.consultation.ordonnance.prescriptions %}
-                        <li class="mb-5">
-                            <strong>{{ prescription.medicament.nom }}</strong>
-                            ({{ prescription.medicament.dosage }})
-                            — {{ prescription.posologie }},
-                            {{ prescription.frequence }},
-                            pendant {{ prescription.dureeJours }} jours
-                        </li>
-                    {% endfor %}
-                {% endif %} 
-                
-                
-            
+	<table class="table">
+		<tbody>
+			<tr>
+				<th>Id</th>
+				<td>{{ patient.id }}</td>
+			</tr>
+			<tr>
+				<th>Nom</th>
+				<td>{{ patient.nom }}</td>
+			</tr>
+			<tr>
+				<th>Prenom</th>
+				<td>{{ patient.prenom }}</td>
+			</tr>
+			<tr>
+				<th>Date_naissance</th>
+				<td>{{ patient.dateNaissance ? patient.dateNaissance|date('Y-m-d') : '' }}</td>
+			</tr>
+			<tr>
+				<th>Sexe</th>
+				<td>{{ patient.sexe }}</td>
+			</tr>
+			<tr>
+				<th>Adresse</th>
+				<td>{{ patient.adresse }}</td>
+			</tr>
+			<tr>
+				<th>Telephone</th>
+				<td>{{ patient.telephone }}</td>
+			</tr>
+			<tr>
+				<th>Email</th>
+				<td>{{ patient.email }}</td>
+			</tr>
+			<tr>
+				<th>Numero_secu</th>
+				<td>{{ patient.numeroSecu }}</td>
+			</tr>
+			<tr>
+				<th>Date_inscription</th>
+				<td>{{ patient.dateInscription ? patient.dateInscription|date('Y-m-d') : '' }}</td>
+			</tr>
+		</tbody>
+	</table>
 
 
+	{% for rdv in patient.listeRendezVous %}
+		{% if  rdv.consultation %}
+			<h2 class="mt-5 mb-2">Consultation du
+				{{rdv.consultation.dateHeure|date('d/m/Y')}}</h2>
+			<p>
+				<strong>{{rdv.consultation.diagnostic}}</strong>
+			</p>
+			<span>{{rdv.consultation.anamnese}}</span>
+			<span>{{rdv.consultation.notes}}</span>
 
-        {% endif %}
 
-    {% endfor %}
+			{% if  rdv.consultation.ordonnance %}
+				<h5 class="mt-4 mb-2">Ordonnance du
+					{{ rdv.consultation.ordonnance.dateEmission|date('d/m/Y') }}</h5>
+				<p>{{rdv.consultation.ordonnance.instructions}}</p>
+				<ul>
+					{% for prescription in rdv.consultation.ordonnance.prescriptions %}
+						<li class="mb-5">
+							<strong>{{ prescription.medicament.nom }}</strong>
+							({{ prescription.medicament.dosage }})
+							                            —
+							{{ prescription.posologie }},
+							{{ prescription.frequence }},
+							                            pendant
+							{{ prescription.dureeJours }}
+							jours
+						</li>
+					{% endfor %}
+				{% endif %}
 
 
+			{% endif %}
+
+		{% endfor %}
 
 
+		<a href="{{ path('app_admin_patient_index') }}">back to list</a>
+
+		<a href="{{ path('app_admin_patient_edit', {'id': patient.id}) }}">edit</a>
 
 
-
-
-    <a href="{{ path('app_admin_patient_index') }}">back to list</a>
-
-    <a href="{{ path('app_admin_patient_edit', {'id': patient.id}) }}">edit</a>
-    
-
-    {{ include('admin/patient/_delete_form.html.twig') }}
-{% endblock %}
+		{{ include('admin/patient/_delete_form.html.twig') }}
+	{% endblock %}

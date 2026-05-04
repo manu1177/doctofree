@@ -1,30 +1,32 @@
 {% extends 'admin/base.html.twig' %}
 
-{% block title %}Rendezvous index{% endblock %}
+{% block title %}Rendezvous index
+{% endblock %}
 
 {% block admin_content %}
-    <h1 class="my-5 text-center text-danger">Rendez-vous</h1>
+	<h1 class="my-5 text-center text-danger">Rendez-vous</h1>
 
-    <table class="table">
-       
-        <tbody>
-        {% for rendezvou in rendezvouses %}
-            <ul>
-           
-                <li>{{ rendezvou.dateHeure ? rendezvou.dateHeure|date('Y-m-d H:i:s') : '' }} {{ rendezvou.dureeMinutes }}<a class="mx-5" href="{{ path('app_admin_rendezvous_show', {'id': rendezvou.id}) }}">show</a></li>
-                
-               
+	<table class="table">
 
-                    {# <a href="{{ path('app_admin_rendezvous_edit', {'id': rendezvou.id}) }}">edit</a> #}
-               
-            </ul>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+		<tbody>
+			{% for rendezvous in rendezvouses %}
+				<ul>
 
-    <a href="{{ path('app_admin_rendezvous_new') }}">Create new</a>
+					<li>{{ rendezvous.dateHeure ? rendezvous.dateHeure|date('Y-m-d H:i:s') : '' }}
+						{{ rendezvous.dureeMinutes }}<a class="mx-5" href="{{ path('app_admin_rendezvous_show', {'id': rendezvous.id}) }}">show</a>
+					</li>
+
+
+					{# <a href="{{ path('app_admin_rendezvous_edit', {'id': rendezvou.id}) }}">edit</a> #}
+
+				</ul>
+			{% else %}
+				<tr>
+					<td colspan="6">no records found</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<a href="{{ path('app_admin_rendezvous_new') }}">Create new</a>
 {% endblock %}
